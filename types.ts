@@ -5,10 +5,13 @@ export enum UserRole {
   SUPER_ADMIN = 'SUPER_ADMIN'
 }
 
+export type ClassLevel = 'L1' | 'L2' | 'L3' | 'L4' | 'L5';
+export type Campus = '138' | '158' | '168';
+
 export interface User {
   id: string;
   username: string;
-  password?: string; // Stored hashed/encrypted
+  password?: string;
   role: UserRole;
   createdAt: number;
 }
@@ -16,7 +19,7 @@ export interface User {
 export interface Card {
   id: string;
   name: string;
-  categoryId: string; // One of the 5 main categories
+  categoryId: string;
   description: string;
 }
 
@@ -29,21 +32,29 @@ export interface CardCategory {
 export interface Student {
   id: string;
   name: string;
-  awardedCardIds: string[]; // IDs of cards currently held
+  awardedCardIds: string[];
 }
 
 export interface ClassSession {
   id: string;
   name: string;
   time: string;
-  teacherId?: string; // Linked teacher username or ID
-  adminId: string;    // Created by
+  level: ClassLevel;
+  campus: Campus;
+  teacherId?: string;
+  adminId: string;
   students: Student[];
-  /** 
-   * Stores the IDs of the 5 specific cards selected for this class session.
-   * One card for each of the 5 main categories.
-   */
-  activeCardIds: string[]; 
+}
+
+export interface AwardRecord {
+  id: string;
+  studentId: string;
+  studentName: string;
+  classId: string;
+  className: string;
+  cardIds: string[];
+  timestamp: number;
+  teacherId: string;
 }
 
 export interface AppState {
@@ -51,4 +62,8 @@ export interface AppState {
   classes: ClassSession[];
   cards: Card[];
   categories: CardCategory[];
+  weeklyCardIdsSmall: string[];
+  weeklyCardIdsLarge: string[];
+  lastCardUpdate?: number;
+  awardHistory: AwardRecord[]; // 新增：评价历史记录
 }

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { getState, findUser, encryptPassword } from '../store';
+import { loginUser } from '../store';
 import { User } from '../types';
 
 interface LoginProps {
@@ -12,14 +12,20 @@ const Login: React.FC<LoginProps> = ({ onLogin, onGoToRegister }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const user = findUser(username);
-    if (user && user.password === encryptPassword(password)) {
+    setError('');
+    setLoading(true);
+
+    const user = await loginUser(username, password);
+    setLoading(false);
+
+    if (user) {
       onLogin(user);
     } else {
-      setError('用户名或密码错误');
+      setError('用户名或密码错误，请检查您的网络连接或凭据');
     }
   };
 
@@ -28,7 +34,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onGoToRegister }) => {
       <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8">
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold text-slate-800">Tooth-Edu</h1>
-          <p className="text-slate-500 mt-2">请登录您的账号</p>
+          <p className="text-slate-500 mt-2">云端管理系统</p>
         </div>
         
         {error && (
@@ -75,9 +81,11 @@ const Login: React.FC<LoginProps> = ({ onLogin, onGoToRegister }) => {
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition"
+            disabled={loading}
+            className={`w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition flex justify-center items-center ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
           >
-            登录
+            {loading ? <i className="fas fa-spinner fa-spin mr-2"></i> : null}
+            {loading ? '正在验证...' : '登录'}
           </button>
         </form>
 
