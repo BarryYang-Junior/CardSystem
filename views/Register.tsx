@@ -16,17 +16,15 @@ const Register: React.FC<RegisterProps> = ({ onGoToLogin }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    // Username validation: alphanumeric only
     if (!/^[a-zA-Z0-9]+$/.test(username)) {
       setError('用户名必须仅包含字母和数字');
       return;
     }
 
-    // Invite code validation
     if (inviteCode !== INVITE_CODE) {
       setError('邀请码不正确');
       return;
@@ -47,9 +45,13 @@ const Register: React.FC<RegisterProps> = ({ onGoToLogin }) => {
     };
 
     state.users.push(newUser);
-    saveState(state);
-    setSuccess(true);
-    setTimeout(() => onGoToLogin(), 2000);
+    const saved = await saveState(state);
+    if (saved) {
+      setSuccess(true);
+      setTimeout(() => onGoToLogin(), 2000);
+    } else {
+      setError('云端注册失败，请检查网络连接');
+    }
   };
 
   return (

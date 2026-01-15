@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { User, UserRole } from './types';
+import { fetchStateFromServer } from './store';
 import Login from './views/Login';
 import Register from './views/Register';
 import TeacherDashboard from './views/TeacherDashboard';
@@ -13,14 +14,20 @@ const App: React.FC = () => {
   const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
-    // 检查本地会话
-    const savedUser = sessionStorage.getItem('logged_user');
-    if (savedUser) {
-      // 在真实系统中，这里应该发送一个请求到后端 /api/me 验证 Token 的有效性
-      setCurrentUser(JSON.parse(savedUser));
-      setView('dashboard');
-    }
-    setIsInitializing(false);
+    const initApp = async () => {
+      // 1. 尝试从云端同步最新数据
+      await fetchStateFromServer();
+      
+      // 2. 检查本地会话
+      const savedUser = sessionStorage.getItem('logged_user');
+      if (savedUser) {
+        setCurrentUser(JSON.parse(savedUser));
+        setView('dashboard');
+      }
+      setIsInitializing(false);
+    };
+
+    initApp();
   }, []);
 
   const handleLogin = (user: User) => {
@@ -37,8 +44,9 @@ const App: React.FC = () => {
 
   if (isInitializing) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-400">
-        <i className="fas fa-circle-notch fa-spin text-3xl"></i>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-900 text-white">
+        <i className="fas fa-tooth fa-spin text-5xl text-rose-500 mb-6"></i>
+        <p className="text-slate-400 font-bold tracking-widest animate-pulse">CONNECTING TO CLOUD...</p>
       </div>
     );
   }
